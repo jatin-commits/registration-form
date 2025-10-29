@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registration Form</title>
+  <style>
+    :root{ --bg:#f3f6f9; --card:#ffffff; --accent:#4f46e5; --muted:#6b7280; --danger:#ef4444 }
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg),#eef2ff); margin:0; padding:40px; color:#111}
+    .container{max-width:820px;margin:0 auto}
+    .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.06);padding:28px}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+
+    form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    label{display:block;font-size:13px;margin-bottom:6px}
+    input[type=text],input[type=email],input[type=password],input[type=tel],select,textarea,input[type=date]{width:100%;padding:10px 12px;border:1px solid #e6e9ee;border-radius:8px;font-size:14px}
+    textarea{min-height:90px;resize:vertical}
+    .full{grid-column:1/-1}
+    .actions{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;padding:10px 14px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid #e6e9ee;color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .error{border-color:var(--danger)}
+    .errorMsg{color:var(--danger);font-size:13px;margin-top:6px}
+    .success{background:#ecfdf5;border-color:transparent;color:#065f46;padding:10px;border-radius:8px;margin-top:10px}
+    .note{font-size:12px;color:var(--muted)}
+    .checkbox-row{display:flex;gap:8px;align-items:center}
+
+    /* responsive */
+    @media (max-width:720px){
+      form{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Create an account</h1>
+      <p class="lead">Quick and secure sign up. All fields marked * are required.</p>
+
+      <form id="regForm" novalidate>
+        <div>
+          <label for="fname">Full name *</label>
+          <input id="fname" name="fullname" type="text" required placeholder="e.g. Jatin Upadhyay" />
+          <div class="errorMsg" data-for="fname"></div>
+        </div>
+
+        <div>
+          <label for="email">Email address *</label>
+          <input id="email" name="email" type="email" required placeholder="you@example.com" />
+          <div class="errorMsg" data-for="email"></div>
+        </div>
+
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="10-digit number" pattern="\d{10}" />
+          <div class="errorMsg" data-for="phone"></div>
+        </div>
+
+        <div>
+          <label for="dob">Date of birth</label>
+          <input id="dob" name="dob" type="date" />
+        </div>
+
+        <div>
+          <label for="password">Password *</label>
+          <input id="password" name="password" type="password" minlength="6" required placeholder="At least 6 characters" />
+        </div>
+
+        <div>
+          <label for="confirm">Confirm password *</label>
+          <input id="confirm" name="confirm" type="password" minlength="6" required placeholder="Re-type password" />
+          <div class="errorMsg" data-for="confirm"></div>
+        </div>
+
+        <div class="full">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" placeholder="Street, city, state..."></textarea>
+        </div>
+
+        <div>
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option value="">Choose...</option>
+            <option>India</option>
+            <option>United States</option>
+            <option>United Kingdom</option>
+            <option>Canada</option>
+            <option>Australia</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Gender</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label><input type="radio" name="gender" value="male"> Male</label>
+            <label><input type="radio" name="gender" value="female"> Female</label>
+            <label><input type="radio" name="gender" value="other"> Other</label>
+          </div>
+        </div>
+
+        <div class="full">
+          <label class="small">Password options</label>
+          <div style="display:flex;gap:10px;align-items:center">
+            <label style="font-size:13px"><input type="checkbox" id="showPwd"> Show passwords</label>
+            <span class="note">Use a strong password with letters and numbers.</span>
+          </div>
+        </div>
+
+        <div class="full">
+          <label class="checkbox-row"><input id="terms" type="checkbox" required> I agree to the <a href="#">terms &amp; conditions</a> *</label>
+          <div class="errorMsg" data-for="terms"></div>
+        </div>
+
+        <div class="full actions">
+          <button type="submit" class="btn">Register</button>
+          <button type="button" class="btn ghost" id="resetBtn">Reset</button>
+          <div style="margin-left:auto" class="small">Already have an account? <a href="#">Sign in</a></div>
+        </div>
+
+        <div id="result" class="full" style="display:none"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // small client-side validation and UX
+    const form = document.getElementById('regForm');
+    const showPwd = document.getElementById('showPwd');
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('confirm');
+    const result = document.getElementById('result');
+    const resetBtn = document.getElementById('resetBtn');
+
+    showPwd.addEventListener('change', e=>{
+      const t = e.target.checked ? 'text' : 'password';
+      password.type = t; confirm.type = t;
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      form.reset();
+      result.style.display = 'none';
+      document.querySelectorAll('.errorMsg').forEach(n=>n.textContent='');
+      document.querySelectorAll('input,textarea,select').forEach(i=>i.classList.remove('error'));
+    });
+
+    function setError(field, msg){
+      const div = document.querySelector('.errorMsg[data-for="'+field.id+'"]');
+      if(div) div.textContent = msg;
+      field.classList.add('error');
+    }
+    function clearError(field){
+      const div = document.querySelector('.errorMsg[data-for="'+field.id+'"]');
+      if(div) div.textContent = '';
+      field.classList.remove('error');
+    }
+
+    function validateEmail(email){
+      // simple email check
+      return /\S+@\S+\.\S+/.test(email);
+    }
+
+    form.addEventListener('submit', e=>{
+      e.preventDefault();
+      let valid = true;
+      result.style.display = 'none';
+      document.querySelectorAll('.errorMsg').forEach(n=>n.textContent='');
+      document.querySelectorAll('input,textarea,select').forEach(i=>i.classList.remove('error'));
+
+      const fname = document.getElementById('fname');
+      const email = document.getElementById('email');
+      const phone = document.getElementById('phone');
+      const terms = document.getElementById('terms');
+
+      if(!fname.value.trim()){ setError(fname, 'Full name is required'); valid = false;} else clearError(fname);
+      if(!email.value.trim() || !validateEmail(email.value)){ setError(email,'Please enter a valid email'); valid = false;} else clearError(email);
+      if(phone.value && !/^\d{10}$/.test(phone.value)) { setError(phone,'Phone must be 10 digits'); valid = false; } else clearError(phone);
+      if(password.value.length < 6){ setError(password,'Password must be at least 6 characters'); valid = false; } else clearError(password);
+      if(confirm.value !== password.value){ setError(confirm,'Passwords do not match'); valid = false; } else clearError(confirm);
+      if(!terms.checked){ document.querySelector('.errorMsg[data-for="terms"]').textContent = 'You must agree to terms'; valid = false; }
+
+      if(!valid){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+
+      // If valid, show a small success message (replace with actual submission)
+      result.style.display = 'block';
+      result.className = 'full success';
+      result.textContent = 'Registration successful! (This demo does not send data to a server.)';
+
+      // To actually submit, remove preventDefault and send via fetch / form action
+      // Example: fetch('/register', {method:'POST', body:new FormData(form)})...
+    });
+  </script>
+</body>
+</html>
